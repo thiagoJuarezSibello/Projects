@@ -9,12 +9,12 @@ FROM ProyectoParquesIndustriales.dbo.AnrsAprobados
 SELECT *
 FROM ParquesIndustriales
 
--- Puse los caracter que faltaban, habia algunos publicos y privados tambien
+-- Updated missing park states (public, private and mixed)
 UPDATE ParquesIndustriales
 SET caracter = 'MIXTO'
 WHERE ID = 117
 
--- Borre todos los parques duplicados usando una CTE primero, para probar la consulta 
+-- Deleted all duplicated parks using a CTE first, to test the query 
 WITH Cte_Parques
 AS(
 SELECT ID,nombre,
@@ -38,7 +38,7 @@ SELECT ID,nombre,
 DELETE DUPLICADO
 FROM Cte_Parques
 
--- Aca hice la consulta definitiva para borrar los duplicados
+-- Definitive query to delete duplicates
 SELECT ID,nombre,
   ROW_NUMBER() OVER (PARTITION BY 
                     ID,nombre
@@ -52,57 +52,57 @@ FROM ParquesIndustriales
 SELECT *
 FROM ParquesIndustriales
 
--- Aca borre una fila que aparecia toda como NULL
+-- Deleted a NULL row
 DELETE
 FROM ParquesIndustriales
 WHERE nombre IS NULL
 
--- Reinicie los ID borrando y volviendo a crear la columna, haciendola autoincrementable
+-- Made ID autoincrement
 ALTER TABLE ParquesIndustriales DROP COLUMN ID
 
 ALTER TABLE ParquesIndustriales ADD ID INT IDENTITY(1,1)
 
--- Cuento la cantidad total de parques
+-- Total count of parks
 SELECT COUNT(nombre) AS TotalParques
 FROM ParquesIndustriales
 
--- Cuento la cantidad total de parques p˙blicos
-SELECT COUNT(caracter) AS TotalParquesP˙blicos
+-- Total count of public parks
+SELECT COUNT(caracter) AS TotalParquesP√∫blicos
 FROM ParquesIndustriales
-WHERE caracter = 'P⁄BLICO MUNICIPAL' OR caracter = 'P⁄BLICO PROVINCIAL' OR caracter = 'P⁄BLICO'
+WHERE caracter = 'P√öBLICO MUNICIPAL' OR caracter = 'P√öBLICO PROVINCIAL' OR caracter = 'P√öBLICO'
 
--- Cuento la cantidad total de parques mixtos
+-- Total count of mix parks
 SELECT COUNT(caracter) AS TotalParquesMixtos
 FROM ParquesIndustriales
 WHERE caracter = 'MIXTO'
 
--- Cuento la cantidad total de parques privados
+-- Total count of private parks
 SELECT COUNT(caracter) AS TotalParquesPrivados
 FROM ParquesIndustriales
 WHERE caracter = 'PRIVADO'
 
---Contar cuantos parques recibieron ANR
+--Total count of how many parks got financial aid (ANR)
 SELECT COUNT(parque_industrial) AS ParquesAsistidos
 FROM AnrsAprobados
 
---Monto total de los ANR
+--Total amount of financial aid (ANR)
 SELECT AVG(monto_anr) AS MontoTotal
 FROM AnrsAprobados
 
--- Ver cuales parques fueron asistidos con ANR de todos los de la base
+-- See which parks got financial aid(ANR)
 SELECT p.RL, a.parque_industrial, a.caracter, a.municipio, a.provincia, a.monto_anr, a.descripcion_obra, a.fecha_aprobacion
 FROM ParquesIndustriales p
 INNER JOIN AnrsAprobados a
 ON p.RL = a.rl
 
---Agrego el parque nuevo que se inscribiÛ
+--Added a new park
 INSERT INTO ParquesIndustriales VALUES
-('RL-2023-86884634-APN-CPI#MDP', 'PARQUE INDUSTRIAL RÕO CUARTO II (CECIS)', 'P⁄BLICO', 'INSCRIPTO', '', 'RÕO CUARTO', '', 'C”RDOBA', '', -33.17519, -64.38300)
+('RL-2023-86884634-APN-CPI#MDP', 'PARQUE INDUSTRIAL R√çO CUARTO II (CECIS)', 'P√öBLICO', 'INSCRIPTO', '', 'R√çO CUARTO', '', 'C√ìRDOBA', '', -33.17519, -64.38300)
 
 SELECT *
 FROM ParquesIndustriales
 
--- Calculo el porcentaje de parques publicos, mixtos y privados sobre el total
+-- Percentage of public, mixed and private parks over the total.
 CREATE TABLE #temp_parques(
 TotalPublicos int,
 TotalMixtos int,
@@ -128,5 +128,4 @@ FROM #temp_parques
 
 SELECT TotalPublicos, TotalParques, (TotalPrivados*100) / (TotalParques) AS PorcentajePrivados
 FROM #temp_parques
-
 
